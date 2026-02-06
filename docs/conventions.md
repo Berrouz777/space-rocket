@@ -1,9 +1,9 @@
 ### 1. Общие принципы
 
-* Код должен быть единообразным, форматирование автоматизировано (Prettier + ESLint).
-* Используем строгий TypeScript во всём проекте (`.ts`, `<script setup lang="ts">`).
-* Компоненты, функции и переменные должны быть самодокументируемыми — минимум «магии».
-* Не оставляем `console.log` и `debugger` в production.
+- Код должен быть единообразным, форматирование автоматизировано (Prettier + ESLint).
+- Используем строгий TypeScript во всём проекте (`.ts`, `<script setup lang="ts">`).
+- Компоненты, функции и переменные должны быть самодокументируемыми — минимум «магии».
+- Не оставляем `console.log` и `debugger` в production.
 
 ---
 
@@ -39,7 +39,7 @@
 │   ├── enums             # общие перечисления для модулей
 │   ├── stores            # Pinia-сторы общего назначения
 │   ├── ui                # UI-кит: кнопки, заголовки и др.
-│   └── ...и другое 
+│   └── ...и другое
 ├── assets                # статические ресурсы и стили
 │   ├── css               # исходники Tailwind и кастомных CSS-компонентов
 │   └── images            # фоновые изображения и графика
@@ -49,12 +49,12 @@
 /i18n
 └── en.json / ru.json     # файлы локализации
 
-``` 
+```
 
 ### 3. Нейминг
 
 | **Что**             | **Рекомендуемый стиль** | **Пример**                                                                  | **Почему**                                                                   |
-| ------------------- |-------------------------|-----------------------------------------------------------------------------| ---------------------------------------------------------------------------- |
+| ------------------- | ----------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | **Папки**           | `kebab-case`            | `user-profile/`, `game-board/`                                              | Универсальный стандарт во Vue, читаемость выше, нет проблем на Linux/Windows |
 | **Vue-компоненты**  | `PascalCase`            | `UserCard.vue`, `GameBoard.vue`                                             | Принято во Vue, поддерживается автоимпортом Nuxt                             |
 | **Stores**          | `kebab-case.store.ts`   | `user.store.ts`, `game.store.ts`<br>внутри → `useUserStore`, `useGameStore` | Ясно видно, что файл — Pinia store                                           |
@@ -67,20 +67,21 @@
 
 ### 3. Стиль кода
 
-* **Форматирование кода полностью отдаётся Prettier.**
-* Строки до `160` символов.
-* Четыре пробела (`tabWidth: 4`, `useTabs: false`).
-* **JS/TS:** без `;`, одинарные кавычки, `arrowParens: always`.
-* **Vue:** `<script>` и `<style>` с отступами, атрибуты можно писать в одну строку, если влезают.
-* **TailwindCSS:** классы сортируются автоматически (`prettier-plugin-tailwindcss`).
-* Никаких ручных завершающих запятых.
-* Всегда использовать `import type` для типов.
+- **Форматирование кода полностью отдаётся Prettier.**
+- Строки до `160` символов.
+- Четыре пробела (`tabWidth: 4`, `useTabs: false`).
+- **JS/TS:** без `;`, одинарные кавычки, `arrowParens: always`.
+- **Vue:** `<script>` и `<style>` с отступами, атрибуты можно писать в одну строку, если влезают.
+- **TailwindCSS:** классы сортируются автоматически (`prettier-plugin-tailwindcss`).
+- Никаких ручных завершающих запятых.
+- Всегда использовать `import type` для типов.
 
 ---
 
 #### 3.1. Порядок секций в `<script setup>`
 
 Рекомендовано секции внутри компонента располагать в следующем порядке:
+
 1. **Импорты** (группами)
 2. **Props**
 3. **Bindings** (storeToRefs, методы стора, computed, прочее)
@@ -95,42 +96,47 @@
 
 ```vue
 <script setup lang="ts">
-// Components
-import AppLoader from '~/components/app/loaders/AppLoader.vue'
+    // Components
+    import AppLoader from '~/components/app/loaders/AppLoader.vue'
 
-// Composables
-import { useRoute } from '#app'
-import { useUserStore } from '~/store/user/user.store'
+    // Composables
+    import { useRoute } from '#app'
+    import { useUserStore } from '~/store/user/user.store'
 
-// Bindings
-const { params } = useRoute()
-const { user } = storeToRefs(useUserStore())
+    // Bindings
+    const { params } = useRoute()
+    const { user } = storeToRefs(useUserStore())
 
-// State
-const isLoading = ref(true)
+    // State
+    const isLoading = ref(true)
 
-// Methods
-const fetchUser = async () => {
-  isLoading.value = true
-  await useUserStore().fetchUser(params.id)
-  isLoading.value = false
-}
+    // Methods
+    const fetchUser = async () => {
+        isLoading.value = true
+        await useUserStore().fetchUser(params.id)
+        isLoading.value = false
+    }
 
-// SEO
-useSeoMeta({ title: () => user.value?.name })
+    // SEO
+    useSeoMeta({ title: () => user.value?.name })
 
-// Hooks
-onMounted(() => fetchUser())
+    // Hooks
+    onMounted(() => fetchUser())
 
-// Watchers
-watch(() => user.value?.id, () => console.log('User changed'))
+    // Watchers
+    watch(
+        () => user.value?.id,
+        () => console.log('User changed')
+    )
 </script>
 ```
 
 ---
 
 #### 3.2. Импорты
-* Стараемся группировать логически и разделять комментариями:
+
+- Стараемся группировать логически и разделять комментариями:
+
 ```ts
 // ✅ Good
 // Components
@@ -149,7 +155,8 @@ import { formatDate } from '~/shared/utils/date'
 ---
 
 #### 3.3. State
-* Стараемся указывать явно типы у всех реактивных переменных
+
+- Стараемся указывать явно типы у всех реактивных переменных
 
 ```ts
 const isLoading = ref<boolean>(true)
@@ -159,15 +166,14 @@ const isLoading = ref<boolean>(true)
 
 ### 4. Vue / Nuxt
 
-* Всегда использовать `<script setup lang="ts">`.
-* Props/emit — через `defineProps` и `defineEmits`.
-* Компоненты всегда **PascalCase**.
-* Многострочные шаблоны выравниваются по отступам.
-* Хорошей практикой будет вынос props в отдельный экспортируемы интерфейс
+- Всегда использовать `<script setup lang="ts">`.
+- Props/emit — через `defineProps` и `defineEmits`.
+- Компоненты всегда **PascalCase**.
+- Многострочные шаблоны выравниваются по отступам.
+- Хорошей практикой будет вынос props в отдельный экспортируемы интерфейс
 
 ```vue
 <script setup lang="ts">
-    
     // Interfaces
     export interface ButtonWithTextProps {
         to?: RouteLocationRaw
@@ -177,34 +183,35 @@ const isLoading = ref<boolean>(true)
     }
 
     // Props
-    const props = withDefaults(defineProps<ButtonWithTextProps>(),{
-        dense: false,
+    const props = withDefaults(defineProps<ButtonWithTextProps>(), {
+        dense: false
     })
 </script>
 ```
+
 ---
 
 ### 5. TypeScript
 
-* Не использовать `any` (eslint правило включено).
-* Все публичные функции/методы должны быть типизированы.
-* Типы импортировать через `import type`.
-* DTO и интерфейсы хранить рядом с модулем или в `shared/types`.
+- Не использовать `any` (eslint правило включено).
+- Все публичные функции/методы должны быть типизированы.
+- Типы импортировать через `import type`.
+- DTO и интерфейсы хранить рядом с модулем или в `shared/types`.
 
 ---
 
 ### 6. TailwindCSS
 
-* Используем только утилитарные классы.
-* Кастомные классы допускаются, но минимизируем кастомную верстку, только по необходимости.
+- Используем только утилитарные классы.
+- Кастомные классы допускаются, но минимизируем кастомную верстку, только по необходимости.
 
 ---
 
 ### 7. Pinia
 
-* Используем **только Setup Stores**.
-* Файлы называем `xxx.store.ts`.
-* Функции стора называем `useXxxStore`.
+- Используем **только Setup Stores**.
+- Файлы называем `xxx.store.ts`.
+- Функции стора называем `useXxxStore`.
 
 #### Пример
 
@@ -213,30 +220,30 @@ const isLoading = ref<boolean>(true)
 import { defineStore } from 'pinia'
 
 export const useUserStore = defineStore('user', () => {
-  // state
-  const user = ref<User | null>(null)
-  const isLoading = ref(false)
+    // state
+    const user = ref<User | null>(null)
+    const isLoading = ref(false)
 
-  // getters
-  const isAuthorized = computed(() => !!user.value)
+    // getters
+    const isAuthorized = computed(() => !!user.value)
 
-  // actions
-  const fetchUser = async (id: string) => {
-    isLoading.value = true
-    try {
-      // api-запрос
-      user.value = await api.getUser(id)
-    } finally {
-      isLoading.value = false
+    // actions
+    const fetchUser = async (id: string) => {
+        isLoading.value = true
+        try {
+            // api-запрос
+            user.value = await api.getUser(id)
+        } finally {
+            isLoading.value = false
+        }
     }
-  }
 
-  return {
-    user,
-    isLoading,
-    isAuthorized,
-    fetchUser
-  }
+    return {
+        user,
+        isLoading,
+        isAuthorized,
+        fetchUser
+    }
 })
 ```
 
@@ -244,19 +251,24 @@ export const useUserStore = defineStore('user', () => {
 
 1. **ref() → state**
 
-   ```ts
-   const count = ref(0) // state
-   ```
+    ```ts
+    const count = ref(0) // state
+    ```
+
 2. **computed() → getters**
 
-   ```ts
-   const doubleCount = computed(() => count.value * 2) // getter
-   ```
+    ```ts
+    const doubleCount = computed(() => count.value * 2) // getter
+    ```
+
 3. **function() → actions**
 
-   ```ts
-   const increment = () => { count.value++ } // action
-   ```
+    ```ts
+    const increment = () => {
+        count.value++
+    } // action
+    ```
+
 4. Только необходмые state-поля должны быть возвращены в `return {}`.
 5. Можно использовать **watch** и любые composables внутри стора.
 6. В сторах можно инжектить глобальные зависимости (`inject`, `useRoute` и т. д.), но учитываем SSR.
@@ -265,27 +277,29 @@ export const useUserStore = defineStore('user', () => {
 
 ```ts
 export const useUserStore = defineStore('user', {
-  state: () => ({}),
-  getters: {},
-  actions: {}
+    state: () => ({}),
+    getters: {},
+    actions: {}
 })
 ```
+
 > Опционный синтаксис (object stores) запрещён.
 
 ---
 
 #### ✅ Можно
 
-* Setup Stores с `ref`, `computed`, `function`.
-* watchers/composables прямо в store.
+- Setup Stores с `ref`, `computed`, `function`.
+- watchers/composables прямо в store.
 
 ---
 
 ### 8. i18n
-* Все тексты — только через `$t()`.
-* Локали лежат в `/i18n/{lang}.json`.
-* Формат — **nested**, ключи группируются по домену и назначению.
-* Ключи пишутся **snake\_case**.
+
+- Все тексты — только через `$t()`.
+- Локали лежат в `/i18n/{lang}.json`.
+- Формат — **nested**, ключи группируются по домену и назначению.
+- Ключи пишутся **snake_case**.
 
 ---
 
@@ -293,20 +307,20 @@ export const useUserStore = defineStore('user', {
 
 ```json
 {
-  "auth": {
-    "title": "Login to account",
-    "button": {
-      "login": "Sign In",
-      "register": "Register"
+    "auth": {
+        "title": "Login to account",
+        "button": {
+            "login": "Sign In",
+            "register": "Register"
+        }
+    },
+    "console": {
+        "actions": {
+            "next": "Next",
+            "prev": "Previous",
+            "play": "Play"
+        }
     }
-  },
-  "console": {
-    "actions": {
-      "next": "Next",
-      "prev": "Previous",
-      "play": "Play"
-    }
-  }
 }
 ```
 
@@ -314,9 +328,9 @@ export const useUserStore = defineStore('user', {
 
 ```json
 {
-  "auth_title": "Login to account",
-  "auth_button_login": "Sign In",
-  "console_actions_next": "Next"
+    "auth_title": "Login to account",
+    "auth_button_login": "Sign In",
+    "console_actions_next": "Next"
 }
 ```
 
@@ -334,19 +348,19 @@ export const useUserStore = defineStore('user', {
 
 ```json
 {
-  "auth": {
-    "title": "Login to account",
-    "button": {
-      "login": "Sign In",
-      "register": "Register"
+    "auth": {
+        "title": "Login to account",
+        "button": {
+            "login": "Sign In",
+            "register": "Register"
+        }
+    },
+    "console": {
+        "actions": {
+            "next": "Next",
+            "prev": "Previous"
+        }
     }
-  },
-  "console": {
-    "actions": {
-      "next": "Next",
-      "prev": "Previous"
-    }
-  }
 }
 ```
 
@@ -354,19 +368,19 @@ export const useUserStore = defineStore('user', {
 
 ```json
 {
-  "auth": {
-    "title": "Вход в аккаунт",
-    "button": {
-      "login": "Войти",
-      "register": "Зарегистрироваться"
+    "auth": {
+        "title": "Вход в аккаунт",
+        "button": {
+            "login": "Войти",
+            "register": "Зарегистрироваться"
+        }
+    },
+    "console": {
+        "actions": {
+            "next": "Далее",
+            "prev": "Назад"
+        }
     }
-  },
-  "console": {
-    "actions": {
-      "next": "Далее",
-      "prev": "Назад"
-    }
-  }
 }
 ```
 
@@ -376,11 +390,11 @@ export const useUserStore = defineStore('user', {
 
 ```vue
 <template>
-  <div>
-    <h1>{{ $t('auth.title') }}</h1>
-    <button>{{ $t('auth.button.login') }}</button>
-    <button>{{ $t('console.actions.next') }}</button>
-  </div>
+    <div>
+        <h1>{{ $t('auth.title') }}</h1>
+        <button>{{ $t('auth.button.login') }}</button>
+        <button>{{ $t('console.actions.next') }}</button>
+    </div>
 </template>
 ```
 
@@ -388,13 +402,13 @@ export const useUserStore = defineStore('user', {
 
 ### 9. Git Workflow
 
-* Ветки: `feature/*`, `fix/*`, `chore/*`.
-* Коммиты — [Conventional Commits](https://www.conventionalcommits.org/):
-* В PR — линтер и тесты должны проходить.
+- Ветки: `feature/*`, `fix/*`, `chore/*`.
+- Коммиты — [Conventional Commits](https://www.conventionalcommits.org/):
+- В PR — линтер и тесты должны проходить.
 
 ---
 
 ### 10. Инструменты
 
-* **ESLint** — линтинг.
-* **Prettier** — автоформатирование.
+- **ESLint** — линтинг.
+- **Prettier** — автоформатирование.

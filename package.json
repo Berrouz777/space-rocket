@@ -14,6 +14,7 @@
         "format:check": "prettier --check ."
     },
     "dependencies": {
+        "@artmizu/yandex-metrika-nuxt": "^1.2.1",
         "@nuxt/fonts": "0.11.4",
         "@nuxtjs/device": "3.2.4",
         "@nuxtjs/i18n": "^10.1.0",
@@ -21,20 +22,28 @@
         "nuxt": "^4.1.0",
         "pinia": "^3.0.3",
         "vue": "^3.5.20",
-        "vue-router": "^4.5.1"
+        "vue-router": "^4.5.1",
+        "@vueuse/core": "^14.0.0",
+        "howler": "^2.2.4",
+        "izitoast": "^1.4.0",
+        "nuxt-toast": "^1.4.0",
+        "pinia-plugin-persistedstate": "^4.7.1"
     },
     "devDependencies": {
         "@nuxt/eslint": "^1.9.0",
         "@nuxt/eslint-config": "^1.9.0",
         "@nuxtjs/tailwindcss": "^6.14.0",
+        "@types/howler": "^2.2.12",
         "@typescript-eslint/eslint-plugin": "^8.42.0",
         "@typescript-eslint/parser": "^8.42.0",
+        "@vite-pwa/nuxt": "^1.0.7",
         "eslint": "^9.34.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-tailwindcss": "^3.18.2",
         "eslint-plugin-unused-imports": "^4.2.0",
         "eslint-plugin-vue": "^10.4.0",
         "lint-staged": "^16.1.6",
+        "nuxt-vite-legacy": "^2.0.1",
         "prettier": "^3.6.2",
         "prettier-plugin-tailwindcss": "^0.6.14",
         "simple-git-hooks": "^2.13.1",
