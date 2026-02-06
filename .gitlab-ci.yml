@@ -8,8 +8,17 @@ stages:
 
 variables:
     DOCKERFILE: Dockerfile.production
-    IMAGE_BUILD_NAME: "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
-    GIT_REPOSITORY_URL: git.intextech.ru/winnery/elektronika-game.git
+    IMAGE_BUILD_NAME: '$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME'
+    STAGE_HOST: $WINNERY_STAGE_SERVER_HOST
+    STAGE_PORT: $WINNERY_STAGE_SERVER_PORT
+    STAGE_USER: $WINNERY_STAGE_SERVER_USER
+    STAGE_DIRECTORY: $WINNERY_STAGE_SERVER_DIRECTORY
+    STAGE_SSH_PRIVATE_KEY: $WINNERY_STAGE_SERVER_SSH_PRIVATE_KEY
+    PRODUCTION_HOST: $WINNERY_PRODUCTION2_SERVER_HOST
+    PRODUCTION_PORT: $WINNERY_PRODUCTION2_SERVER_PORT
+    PRODUCTION_USER: $WINNERY_PRODUCTION2_SERVER_USER
+    PRODUCTION_DIRECTORY: $WINNERY_PRODUCTION2_SERVER_DIRECTORY
+    PRODUCTION_SSH_PRIVATE_KEY: $WINNERY_PRODUCTION2_SERVER_SSH_PRIVATE_KEY
 
 .tags:
     only:
@@ -41,18 +50,24 @@ increment-version:
     stage: prepare
     extends: .only-master
     script:
+        - git fetch --tags --force --prune
+        - git fetch --unshallow || true
+
         - echo "Fetching the latest tag..."
-        - export LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+        - export LATEST_TAG=$(git tag --sort=-v:refname | head -n 1)
         - if [ -z "$LATEST_TAG" ]; then export LATEST_TAG="v0.0.0"; fi
+
         - export MAJOR=$(echo $LATEST_TAG | cut -d'.' -f1 | cut -d'v' -f2)
         - export MINOR=$(echo $LATEST_TAG | cut -d'.' -f2)
         - export PATCH=$(echo $LATEST_TAG | cut -d'.' -f3)
+
         - if [ "$PATCH" -ge 99 ]; then
             export PATCH=01;
             export MINOR=$((MINOR + 1));
             else
             export PATCH=$((PATCH + 1));
             fi
+
         - export RELEASE_VERSION="v$MAJOR.$MINOR.$PATCH"
         - echo "$RELEASE_VERSION" > release_version.txt
         - echo "New version [$RELEASE_VERSION]"
@@ -65,13 +80,11 @@ create-tag:
     needs: [increment-version]
     extends: .only-master
     script:
-        - export RELEASE_VERSION=$(cat release_version.txt)
+        - set -euo pipefail
+        - RELEASE_VERSION=$(cat release_version.txt)
         - echo "Creating tag [$RELEASE_VERSION]"
-        - git remote set-url origin "https://$DEPLOY_TOKEN_USERNAME:$DEPLOY_TOKEN_VALUE@$GIT_REPOSITORY_URL"
         - git tag "$RELEASE_VERSION"
-        - git push origin "$RELEASE_VERSION"
-    dependencies:
-        - increment-version
+        - git push "https://$DEPLOY_TOKEN_USERNAME:$DEPLOY_TOKEN_VALUE@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" "$RELEASE_VERSION"
 
 generate-release-description:
     stage: release
@@ -133,15 +146,29 @@ build-image:
     dependencies:
         - increment-version
 
-deploy-to-winnery-stage-server:
+deploy-to-stage-server:
     stage: deploy
     needs: [build-image, increment-version]
     extends:
         - .only-master
         - .deploy-to-host
     variables:
-        PORT: $WINNERY_STAGE_SERVER_PORT
-        HOST: $WINNERY_STAGE_SERVER_HOST
-        USER: $WINNERY_STAGE_SERVER_USER
-        DIRECTORY: $WINNERY_STAGE_SERVER_DIRECTORY
-        SSH_PRIVATE_KEY: $WINNERY_STAGE_SERVER_SSH_PRIVATE_KEY
+        PORT: $STAGE_PORT
+        HOST: $STAGE_HOST
+        USER: $STAGE_USER
+        DIRECTORY: $STAGE_DIRECTORY
+        SSH_PRIVATE_KEY: $STAGE_SSH_PRIVATE_KEY
+
+deploy-to-production-server:
+    when: manual
+    stage: deploy
+    needs: [build-image, increment-version]
+    extends:
+        - .only-master
+        - .deploy-to-host
+    variables:
+        PORT: $PRODUCTION_PORT
+        HOST: $PRODUCTION_HOST
+        USER: $PRODUCTION_USER
+        DIRECTORY: $PRODUCTION_DIRECTORY
+        SSH_PRIVATE_KEY: $PRODUCTION_SSH_PRIVATE_KEY
