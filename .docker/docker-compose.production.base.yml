@@ -1,7 +1,7 @@
 services:
 
-  winnery.this-new-game:
-    image: winnery.this-new-game:${APP_VERSION:-v0.0.0}
+  winnery.space-rocket.frontend:
+    image: winnery.space-rocket.frontend:${APP_VERSION:-v0.0.0}
     ports:
       - ${APP_EXTERNAL_PORT}:3000
     ulimits:
@@ -15,4 +15,4 @@ services:
       - NUXT_PUBLIC_GOOGLE_ANALYTICS_ID=$GOOGLE_ANALYTICS_ID
     security_opt:
       - seccomp:unconfined
-    container_name: winnery.this-new-game
+    container_name: winnery.space-rocket.frontend

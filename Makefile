@@ -59,7 +59,7 @@ pull-production-image-from-registry: ## Pull backend image from registry: URL, U
 	echo $(PASSWORD) | docker login ${URL} --username ${USERNAME} --password-stdin &&\
 	docker pull ${IMAGE}:${VERSION} &&\
 	docker logout ${URL} &&\
-	docker tag ${IMAGE}:${VERSION} winnery.this-new-game:${VERSION} &&\
+	docker tag ${IMAGE}:${VERSION} winnery.space-rocket.frontend:${VERSION} &&\
 	docker rmi ${IMAGE}:${VERSION}
 
 
@@ -67,16 +67,16 @@ pull-production-image-from-registry: ## Pull backend image from registry: URL, U
 
 .PHONY: frontend
 frontend: ## Enter backend container
-	docker exec -it winnery.this-new-game sh
+	docker exec -it winnery.space-rocket.frontend sh
 
 .PHONY: frontend-logs
 frontend-logs: ## Logs backend service
-	docker logs -f --tail=10 winnery.this-new-game
+	docker logs -f --tail=10 winnery.space-rocket.frontend
 
 .PHONY: frontend-restart
 frontend-restart: ## Restart backend container
-	docker restart winnery.this-new-game
+	docker restart winnery.space-rocket.frontend
 
 .PHONY: frontend-copy-deps
 frontend-copy-deps: ## Copy composer vendor dependencies from container to host machine (relevant to dev mode)
-	docker cp winnery.this-new-game:/dependencies/node_modules .
+	docker cp winnery.space-rocket.frontend:/dependencies/node_modules .

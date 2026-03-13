@@ -1,4 +1,4 @@
 services:
 
-  winnery.this-new-game:
+  winnery.space-rocket.frontend:
     restart: always

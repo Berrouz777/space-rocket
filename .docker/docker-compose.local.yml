@@ -1,7 +1,7 @@
 services:
 
-  winnery.this-new-game:
-    image: winnery.this-new-game:${APP_VERSION:-v0.0.0}
+  winnery.space-rocket.frontend:
+    image: winnery.space-rocket.frontend:${APP_VERSION:-v0.0.0}
     ports:
       - ${APP_EXTERNAL_PORT}:3000
     build:
@@ -9,4 +9,4 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ..:/var/www/html
-    container_name: winnery.this-new-game
+    container_name: winnery.space-rocket.frontend
