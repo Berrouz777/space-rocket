@@ -1,0 +1,45 @@
+<template>
+    <div class="orientation-overlay fixed inset-0 z-[200] hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+        <svg
+            class="orientation-icon block h-28 w-28 fill-current text-white/90"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 612 612"
+            aria-hidden="true"
+        >
+            <path
+                d="M419.475,63.75c84.15,38.25,142.8,119.85,153,216.75h38.25C595.425,122.4,465.375,0,304.725,0c-5.1,0-10.2,0-17.85,0 l96.9,96.9L419.475,63.75z M258.825,43.35c-15.3-15.3-38.25-15.3-53.55,0l-163.2,163.2c-15.3,15.3-15.3,38.25,0,53.55l306,306 c15.301,15.301,38.25,15.301,53.551,0L564.825,402.9c15.301-15.301,15.301-38.25,0-53.551L258.825,43.35z M376.125,540.6l-306-306 l163.2-163.2l306,306L376.125,540.6z M189.975,548.25c-84.15-38.25-142.8-119.85-153-216.75h-35.7 c12.75,158.1,142.8,280.5,303.45,280.5c5.1,0,10.2,0,17.85,0l-96.899-96.9L189.975,548.25z"
+            />
+        </svg>
+    </div>
+</template>
+
+<style scoped>
+    .orientation-overlay {
+        display: none;
+    }
+
+    @media (orientation: landscape) and (max-width: 900px) {
+        .orientation-overlay {
+            display: flex;
+        }
+    }
+
+    @keyframes orientation-wiggle {
+        0%,
+        25% {
+            transform: rotate(-12deg);
+        }
+        50% {
+            transform: rotate(12deg);
+        }
+        75%,
+        100% {
+            transform: rotate(-12deg);
+        }
+    }
+
+    .orientation-icon {
+        animation: orientation-wiggle 2.2s ease-in-out infinite;
+    }
+</style>

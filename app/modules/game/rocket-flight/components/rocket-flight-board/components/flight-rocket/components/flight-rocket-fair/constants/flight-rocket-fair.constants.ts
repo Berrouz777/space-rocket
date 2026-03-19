@@ -1,0 +1,1 @@
+export const FLIGHT_ROCKET_FAIR_FLY_FRAME_MS = 100
