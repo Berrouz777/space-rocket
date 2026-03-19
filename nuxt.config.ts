@@ -16,6 +16,10 @@ export default defineNuxtConfig({
             ]
         }
     },
+    devServer: {
+        port: 4000,
+        host: '0.0.0.0'
+    },
     runtimeConfig: {
         public: {
             apiBase: import.meta.env.NUXT_PUBLIC_API_BASE || ''
