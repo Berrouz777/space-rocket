@@ -1,7 +1,8 @@
 import { storeToRefs } from 'pinia'
-import { FLIGHT_ROCKET_EXPLOSION_DURATION_MS } from '../constants'
+import { FLIGHT_CASHOUT_TO_IDLE_DELAY_MS, FLIGHT_CRASH_TO_IDLE_DELAY_MS, FLIGHT_ROCKET_EXPLOSION_DURATION_MS } from '../constants'
 import { useRocketFlightStore } from '../store/rocket-flight.store'
 import { clamp } from '../utils/math.utils'
+import { computed } from 'vue'
 import { useFlowRuntime } from './flow/use-flow-runtime'
 import { useFlightAsteroids } from './flow/use-flight-asteroids'
 import { useFlightMultiplier } from './flow/use-flight-multiplier'
@@ -15,7 +16,7 @@ export const useRocketFlightFlow = () => {
     const elapsedFlightSeconds = ref<number>(0)
     const LAUNCH_ANIMATION_MS = 500
 
-    const { pushTimeout, clearRuntime, startLoop, stopLoop } = useFlowRuntime()
+    const { pushTimeout, clearRuntime, startLoop } = useFlowRuntime()
 
     const resetToIdle = () => {
         clearRuntime()
@@ -36,8 +37,6 @@ export const useRocketFlightFlow = () => {
             return
         }
 
-        stopLoop()
-        clearRuntime()
         flightAsteroids.reset()
         rocketFlightStore.setExplosionVisible(true)
         rocketFlightStore.setPhase('crashed')
@@ -48,7 +47,7 @@ export const useRocketFlightFlow = () => {
 
         void pushTimeout(() => {
             resetToIdle()
-        }, 1200)
+        }, FLIGHT_CRASH_TO_IDLE_DELAY_MS)
     }
 
     const flightAsteroids = useFlightAsteroids({
@@ -57,6 +56,7 @@ export const useRocketFlightFlow = () => {
         rocketXPercent,
         rocketScale,
         currentLevelConfig,
+        canSpawn: computed(() => phase.value === 'flying'),
         setAsteroids: rocketFlightStore.setAsteroids,
         onCrash: crashRound
     })
@@ -66,20 +66,22 @@ export const useRocketFlightFlow = () => {
     const updateFlightObjects = (deltaSeconds: number) => {
         elapsedFlightSeconds.value += deltaSeconds
 
-        // Держим ракету около центра с небольшим дрейфом влево/вправо.
-        const phaseA = roundSeed.value * 0.00073
-        const phaseB = roundSeed.value * 0.00019
-        const waveA = Math.sin(elapsedFlightSeconds.value * 1.25 + phaseA)
-        const waveB = Math.sin(elapsedFlightSeconds.value * 0.68 + phaseB)
-        const driftEnvelope = clamp(elapsedFlightSeconds.value / 0.55, 0, 1)
-        const rocketXPercent = clamp(50 + (waveA * 10 + waveB * 5) * driftEnvelope, 30, 70)
-        rocketFlightStore.setRocketXPercent(rocketXPercent)
+        if (phase.value === 'flying') {
+            // Держим ракету около центра с небольшим дрейфом влево/вправо.
+            const phaseA = roundSeed.value * 0.00073
+            const phaseB = roundSeed.value * 0.00019
+            const waveA = Math.sin(elapsedFlightSeconds.value * 1.25 + phaseA)
+            const waveB = Math.sin(elapsedFlightSeconds.value * 0.68 + phaseB)
+            const driftEnvelope = clamp(elapsedFlightSeconds.value / 0.55, 0, 1)
+            const rocketXPercent = clamp(50 + (waveA * 10 + waveB * 5) * driftEnvelope, 30, 70)
+            rocketFlightStore.setRocketXPercent(rocketXPercent)
 
-        // Размер ракеты полностью анимируется только в фазе countdown.
-        rocketFlightStore.setRocketScale(0.6)
+            // Размер ракеты полностью анимируется только в фазе countdown.
+            rocketFlightStore.setRocketScale(0.6)
 
-        const moonOffsetY = clamp(elapsedFlightSeconds.value * 8, 0, 60)
-        rocketFlightStore.setMoonOffsetYPercent(moonOffsetY)
+            const moonOffsetY = clamp(elapsedFlightSeconds.value * 8, 0, 60)
+            rocketFlightStore.setMoonOffsetYPercent(moonOffsetY)
+        }
 
         flightAsteroids.tickAsteroids(deltaSeconds)
     }
@@ -91,13 +93,12 @@ export const useRocketFlightFlow = () => {
         elapsedFlightSeconds.value = 0
 
         startLoop((_timestamp: number, deltaSeconds: number) => {
-            if (phase.value !== 'flying') {
+            if (phase.value === 'idle' || phase.value === 'countdown' || phase.value === 'launching') {
                 return
             }
 
-            tickMultiplier(deltaSeconds)
-            if (phase.value !== 'flying') {
-                return
+            if (phase.value === 'flying') {
+                tickMultiplier(deltaSeconds)
             }
 
             updateFlightObjects(deltaSeconds)
@@ -130,8 +131,6 @@ export const useRocketFlightFlow = () => {
             return
         }
 
-        stopLoop()
-        clearRuntime()
         flightAsteroids.reset()
         const winAmount = potentialWin.value
         rocketFlightStore.applyWinToBalance(winAmount)
@@ -139,7 +138,7 @@ export const useRocketFlightFlow = () => {
 
         void pushTimeout(() => {
             resetToIdle()
-        }, 450)
+        }, FLIGHT_CASHOUT_TO_IDLE_DELAY_MS)
     }
 
     onUnmounted(() => {

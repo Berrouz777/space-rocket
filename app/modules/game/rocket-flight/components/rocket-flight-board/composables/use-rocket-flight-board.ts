@@ -1,6 +1,7 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 
 import backgroundStarsImage from '~/assets/background-stars.png'
+import backgroundStarsBlurImage from '~/assets/background-stars_blur.png'
 import { formatMultiplier } from '../../../composables/use-flight-curve'
 import { clamp, lerp } from '../../../utils/math.utils'
 import {
@@ -14,16 +15,48 @@ import {
 import type { FlightRoundPhase } from '../../../types/flight.types'
 import type { RocketFlightBoardProps } from '../types/rocket-flight-board.types'
 
+const BLUR_PARALLAX_MAX_OFFSET_PERCENT = 20
+
 export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
     const launchSmoothProgress = ref<number>(0)
     const launchStartedAt = ref<number | null>(null)
     const launchFrameId = ref<number | null>(null)
+    const blurParallaxOffsetPercent = ref<number>(0)
+    const blurParallaxLastTimestamp = ref<number | null>(null)
+    const blurParallaxFrameId = ref<number | null>(null)
 
     const stopLaunchAnimation = () => {
         if (launchFrameId.value !== null) {
             cancelAnimationFrame(launchFrameId.value)
             launchFrameId.value = null
         }
+    }
+
+    const stopBlurParallaxAnimation = () => {
+        if (blurParallaxFrameId.value !== null) {
+            cancelAnimationFrame(blurParallaxFrameId.value)
+            blurParallaxFrameId.value = null
+        }
+    }
+
+    const tickBlurParallaxAnimation = (timestamp: number) => {
+        if (props.phase !== 'flying') {
+            blurParallaxLastTimestamp.value = null
+            return
+        }
+
+        if (blurParallaxLastTimestamp.value === null) {
+            blurParallaxLastTimestamp.value = timestamp
+        }
+
+        const deltaMs = timestamp - blurParallaxLastTimestamp.value
+        blurParallaxLastTimestamp.value = timestamp
+
+        // Медленный, но заметный сдвиг вниз во время полёта (эффект параллакса).
+        const shiftPerSecondPercent = 2
+        const next = blurParallaxOffsetPercent.value + (deltaMs / 1000) * shiftPerSecondPercent
+        blurParallaxOffsetPercent.value = Math.min(next, BLUR_PARALLAX_MAX_OFFSET_PERCENT)
+        blurParallaxFrameId.value = requestAnimationFrame(tickBlurParallaxAnimation)
     }
 
     const tickLaunchAnimation = (timestamp: number) => {
@@ -45,34 +78,54 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
         (nextPhase: FlightRoundPhase) => {
             if (nextPhase === 'idle') {
                 stopLaunchAnimation()
+                stopBlurParallaxAnimation()
                 launchStartedAt.value = null
                 launchSmoothProgress.value = 0
+                blurParallaxLastTimestamp.value = null
+                blurParallaxOffsetPercent.value = 0
                 return
             }
 
             if (nextPhase === 'countdown') {
                 stopLaunchAnimation()
+                stopBlurParallaxAnimation()
                 launchStartedAt.value = null
                 launchSmoothProgress.value = 0
+                blurParallaxLastTimestamp.value = null
+                blurParallaxOffsetPercent.value = 0
                 return
             }
 
             if (nextPhase === 'launching') {
                 stopLaunchAnimation()
+                stopBlurParallaxAnimation()
                 launchStartedAt.value = null
                 launchSmoothProgress.value = 0
+                blurParallaxLastTimestamp.value = null
+                blurParallaxOffsetPercent.value = 0
                 launchFrameId.value = requestAnimationFrame(tickLaunchAnimation)
                 return
             }
 
             stopLaunchAnimation()
             launchSmoothProgress.value = 1
+
+            if (nextPhase === 'flying') {
+                stopBlurParallaxAnimation()
+                blurParallaxLastTimestamp.value = null
+                blurParallaxFrameId.value = requestAnimationFrame(tickBlurParallaxAnimation)
+                return
+            }
+
+            stopBlurParallaxAnimation()
+            blurParallaxLastTimestamp.value = null
         },
         { immediate: true }
     )
 
     onUnmounted(() => {
         stopLaunchAnimation()
+        stopBlurParallaxAnimation()
     })
 
     const launchProgress = computed<number>(() => {
@@ -96,6 +149,17 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
         backgroundSize: 'cover',
         backgroundPosition: 'center'
     }))
+
+    const blurBackgroundStyle = computed<Record<string, string>>(() => ({
+        backgroundImage: `url(${backgroundStarsBlurImage})`,
+        // Увеличиваем фон по высоте, чтобы был запас для смещения,
+        // и двигаем только background-position, не сам слой.
+        backgroundSize: 'auto 140%',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: `center ${100 - blurParallaxOffsetPercent.value}%`
+    }))
+
+    const isBlurBackgroundVisible = computed<boolean>(() => props.phase === 'flying')
 
     const moonStyle = computed<Record<string, string>>(() => ({
         transform: `translate(-50%, ${lerp(0, 140, launchProgress.value)}%) scale(${lerp(1, 0.46, launchProgress.value)})`
@@ -168,18 +232,24 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
         return 'off'
     })
 
+    const isIdleFloatActive = computed<boolean>(() => props.phase === 'idle' || props.phase === 'countdown')
+
     const multiplierText = computed<string>(() => formatMultiplier(props.multiplier))
     const isMultiplierVisible = computed<boolean>(() => props.phase === 'flying' || props.phase === 'crashed' || props.phase === 'cashed_out')
 
     return {
         backgroundStyle,
+        blurBackgroundStyle,
+        isBlurBackgroundVisible,
         moonStyle,
         moonShadowStyle,
         rocketWrapperStyle,
         longFlameStyle,
         longFlameScaleY,
         fairLaunchT,
+        launchProgress,
         fairMode,
+        isIdleFloatActive,
         multiplierText,
         isMultiplierVisible
     }
