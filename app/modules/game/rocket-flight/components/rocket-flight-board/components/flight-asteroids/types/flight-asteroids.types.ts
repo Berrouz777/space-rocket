@@ -1,5 +1,7 @@
-import type { FlightAsteroid } from '../../../../../types/flight.types'
+import type { FlightAsteroid, FlightRoundPhase } from '../../../../../types/flight.types'
 
 export interface FlightAsteroidsProps {
     asteroids: FlightAsteroid[]
+    phase: FlightRoundPhase
+    isFlying: boolean
 }

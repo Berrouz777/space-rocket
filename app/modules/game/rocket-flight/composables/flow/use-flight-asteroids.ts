@@ -16,6 +16,7 @@ export interface UseFlightAsteroidsParams {
     rocketXPercent: Ref<number>
     rocketScale: Ref<number>
     currentLevelConfig: ComputedRef<FlightLevelConfig>
+    canSpawn: Ref<boolean>
     setAsteroids: (value: FlightAsteroid[]) => void
     onCrash: () => void
 }
@@ -83,24 +84,25 @@ export const useFlightAsteroids = (params: UseFlightAsteroidsParams) => {
     }
 
     const updateAsteroids = (deltaSeconds: number) => {
-        const updatedAsteroids = params.asteroids.value
-            .map((asteroid: FlightAsteroid) => {
-                const nextY = asteroid.yPercent + asteroid.speedPercentPerSecond * deltaSeconds
-                const nextXRaw =
-                    pendingCrashAsteroidId.value !== null && asteroid.id === pendingCrashAsteroidId.value
-                        ? params.rocketXPercent.value
-                        : asteroid.xPercent + asteroid.driftPercentPerSecond * deltaSeconds
-                const nextX = clamp(nextXRaw, -12, 112)
-                const willPassRocketLine = !asteroid.passedRocketLine && nextY >= FLIGHT_ROCKET_Y_PERCENT
+        const mappedAsteroids = params.asteroids.value.map((asteroid: FlightAsteroid) => {
+            const nextY = asteroid.yPercent + asteroid.speedPercentPerSecond * deltaSeconds
+            const nextXRaw =
+                pendingCrashAsteroidId.value !== null && asteroid.id === pendingCrashAsteroidId.value
+                    ? params.rocketXPercent.value
+                    : asteroid.xPercent + asteroid.driftPercentPerSecond * deltaSeconds
+            const nextX = clamp(nextXRaw, -12, 112)
+            const willPassRocketLine = !asteroid.passedRocketLine && nextY >= FLIGHT_ROCKET_Y_PERCENT
 
-                return {
-                    ...asteroid,
-                    xPercent: nextX,
-                    yPercent: nextY,
-                    passedRocketLine: asteroid.passedRocketLine || willPassRocketLine
-                }
-            })
-            .filter((asteroid: FlightAsteroid) => asteroid.yPercent <= 120)
+            return {
+                ...asteroid,
+                xPercent: nextX,
+                yPercent: nextY,
+                passedRocketLine: asteroid.passedRocketLine || willPassRocketLine
+            }
+        })
+
+        const shouldCull = params.canSpawn.value
+        const updatedAsteroids = shouldCull ? mappedAsteroids.filter((asteroid: FlightAsteroid) => asteroid.yPercent <= 120) : mappedAsteroids
 
         params.setAsteroids(updatedAsteroids)
 
@@ -126,6 +128,12 @@ export const useFlightAsteroids = (params: UseFlightAsteroidsParams) => {
             distance <= detonationThreshold ||
             crashAsteroid.yPercent >= FLIGHT_ROCKET_Y_PERCENT + rocketRadiusPercent + CRASH_COLLISION_MISS_Y_PADDING_PERCENT
         ) {
+            // Фиксируем позицию "детонировавшего" астероида.
+            const frozenAsteroids = updatedAsteroids.map((a: FlightAsteroid) =>
+                a.id === crashAsteroid.id ? { ...a, speedPercentPerSecond: 0, driftPercentPerSecond: 0 } : a
+            )
+            params.setAsteroids(frozenAsteroids)
+
             pendingCrashAsteroidId.value = null
             params.onCrash()
         }
@@ -133,6 +141,13 @@ export const useFlightAsteroids = (params: UseFlightAsteroidsParams) => {
 
     const tickAsteroids = (deltaSeconds: number) => {
         asteroidSpawnAccumulatorMs.value += deltaSeconds * 1000
+
+        if (!params.canSpawn.value) {
+            // В конце раунда продолжаем двигать уже существующие астероиды,
+            asteroidSpawnAccumulatorMs.value = 0
+            updateAsteroids(deltaSeconds)
+            return
+        }
 
         // Если игра только началась и астероидов ещё нет,
         // сразу создаём несколько, чтобы не было «пустого» старта.
