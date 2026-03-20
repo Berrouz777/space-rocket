@@ -1,6 +1,6 @@
 export const CRASH_ASTEROID_SPAWN_Y_PERCENT = -18
 export const CRASH_ASTEROID_SIZE_PERCENT = 24
-export const CRASH_ASTEROID_SPEED_PERCENT_PER_SECOND = 80
+export const CRASH_ASTEROID_SPEED_PERCENT_PER_SECOND = 200
 
 // Во сколько раз "глубже" астероид должен зайти в ракету до детонации.
 // 1.0 = взрыв при касании окружностей, меньше = взрыв ближе к центру ракеты (выглядит как "влетел внутрь").
