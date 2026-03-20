@@ -3,8 +3,9 @@
         <img class="w-full select-none object-contain" :src="bottomPanelImage" alt="" />
 
         <button
-            class="absolute right-[4%] top-[8.5%] h-[80%] w-[26%] rounded-[4%] bg-[#FFFF29] text-game-2xl font-black text-white"
+            class="absolute right-[3.6%] top-[9%] h-[81%] w-[26.8%] rounded-[4%] bg-gradient-to-b text-game-2xl font-black text-white"
             type="button"
+            :class="isFlying ? 'from-[#FF7E59] to-[#FF6929]' : 'from-[#FF7E59] to-[#FFFF29]'"
             @click="onActionClick"
         >
             {{ actionLabel }}
