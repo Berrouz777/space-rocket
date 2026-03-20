@@ -1,12 +1,12 @@
 <template>
     <div class="relative h-full w-full overflow-hidden bg-[#130737] [container-type:inline-size]">
         <div
-            class="absolute inset-0 bg-[#130737] transition-opacity duration-300"
+            class="absolute inset-0 bg-[#130737] transition-opacity duration-400"
             :class="isBlurBackgroundVisible ? 'opacity-0' : 'opacity-100'"
             :style="backgroundStyle"
         />
         <div
-            class="absolute inset-0 bg-[#130737] transition-opacity duration-500"
+            class="absolute inset-0 bg-[#130737] transition-opacity duration-700"
             :class="isBlurBackgroundVisible ? 'opacity-100' : 'opacity-0'"
             :style="blurBackgroundStyle"
         />
