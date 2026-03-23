@@ -5,6 +5,7 @@ export interface RocketFlightBoardProps {
     countdownValue: number
     multiplier: number
     rocketXPercent: number
+    rocketDodgeNormalized: number
     rocketScale: number
     moonOffsetYPercent: number
     asteroids: FlightAsteroid[]

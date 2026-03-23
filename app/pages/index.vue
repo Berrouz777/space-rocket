@@ -10,6 +10,7 @@
                         :countdown-value="countdownValue"
                         :multiplier="multiplier"
                         :rocket-x-percent="rocketXPercent"
+                        :rocket-dodge-normalized="rocketDodgeNormalized"
                         :rocket-scale="rocketScale"
                         :moon-offset-y-percent="moonOffsetYPercent"
                         :asteroids="asteroids"
@@ -38,7 +39,8 @@
 
     // Bindings
     const rocketFlightStore = useRocketFlightStore()
-    const { phase, countdownValue, multiplier, rocketXPercent, rocketScale, moonOffsetYPercent, asteroids, isExplosionVisible } = storeToRefs(rocketFlightStore)
+    const { phase, countdownValue, multiplier, rocketXPercent, rocketDodgeNormalized, rocketScale, moonOffsetYPercent, asteroids, isExplosionVisible } =
+        storeToRefs(rocketFlightStore)
     const { startRound, cashOut } = useRocketFlightFlow()
     const { gameStretchShellRef, gameContainerRef, gameContainerStyle } = useMobileGameStretch({ mobileMaxWidth: 599 })
 </script>

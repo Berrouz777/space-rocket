@@ -11,6 +11,7 @@ import {
     ROCKET_SCALE_END,
     ROCKET_SCALE_START
 } from '../constants/rocket-flight-board.constants'
+import { ROCKET_DODGE_TILT_MAX_DEG } from '../../../constants'
 
 import type { FlightRoundPhase } from '../../../types/flight.types'
 import type { RocketFlightBoardProps } from '../types/rocket-flight-board.types'
@@ -181,7 +182,7 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
         transform:
             props.phase === 'idle' || props.phase === 'countdown' || props.phase === 'launching'
                 ? `translate(-50%, -50%) scale(${lerp(ROCKET_SCALE_START, ROCKET_SCALE_END, launchProgress.value)})`
-                : `translate(-50%, -50%) scale(${props.rocketScale})`
+                : `translate(-50%, -50%) scale(${props.rocketScale}) rotate(${props.rocketDodgeNormalized * ROCKET_DODGE_TILT_MAX_DEG}deg)`
     }))
 
     const longFlameScaleY = computed<number>(() => {

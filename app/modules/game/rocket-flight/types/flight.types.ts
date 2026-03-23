@@ -20,6 +20,9 @@ export interface FlightAsteroid {
     sizePercent: number
     speedPercentPerSecond: number
     driftPercentPerSecond: number
+    kind: 'ambient' | 'deadly' | 'near_miss'
     isThreat: boolean
     passedRocketLine: boolean
+    dodgeRequested: boolean
+    nearMissDodgeOffsetPercent: number
 }

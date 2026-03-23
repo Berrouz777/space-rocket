@@ -12,6 +12,7 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
     const betAmount = ref<number>(FLIGHT_BET_DEFAULT)
     const lastWinAmount = ref<number>(0)
     const rocketXPercent = ref<number>(50)
+    const rocketDodgeNormalized = ref<number>(0)
     const rocketScale = ref<number>(1)
     const moonOffsetYPercent = ref<number>(0)
     const asteroids = ref<FlightAsteroid[]>([])
@@ -44,6 +45,10 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
 
     const setRocketXPercent = (value: number) => {
         rocketXPercent.value = value
+    }
+
+    const setRocketDodgeNormalized = (value: number) => {
+        rocketDodgeNormalized.value = value
     }
 
     const setRocketScale = (value: number) => {
@@ -84,6 +89,7 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         multiplier.value = 1
         level.value = 1
         rocketXPercent.value = 50
+        rocketDodgeNormalized.value = 0
         rocketScale.value = 1
         moonOffsetYPercent.value = 0
         asteroids.value = []
@@ -100,6 +106,7 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         betAmount,
         lastWinAmount,
         rocketXPercent,
+        rocketDodgeNormalized,
         rocketScale,
         moonOffsetYPercent,
         asteroids,
@@ -115,6 +122,7 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         setMultiplier,
         setLevel,
         setRocketXPercent,
+        setRocketDodgeNormalized,
         setRocketScale,
         setMoonOffsetYPercent,
         setAsteroids,
