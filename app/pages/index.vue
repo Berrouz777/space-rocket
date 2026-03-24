@@ -18,10 +18,8 @@
                     />
                 </div>
 
-                <div class="footer-shell w-full">
-                    <div class="footer-content-shell">
-                        <FooterBlock :phase="phase" @go="startRound" @stop="cashOut" />
-                    </div>
+                <div class="footer-content-shell">
+                    <FooterBlock :phase="phase" @go="startRound" @stop="cashOut" />
                 </div>
             </div>
         </div>
@@ -75,10 +73,6 @@
 
         .game-stretch-shell {
             width: 100vw;
-        }
-
-        .footer-shell {
-            background: linear-gradient(180deg, #ad83be 0%, #251c31 100%);
         }
     }
 </style>
