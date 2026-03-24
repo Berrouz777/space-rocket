@@ -6,13 +6,14 @@ export const CRASH_ASTEROID_SPEED_PERCENT_PER_SECOND = 200
 // Спавн по всей ширине (в процентах ширины поля).
 export const AMBIENT_ASTEROID_MIN_X_PERCENT = 0
 export const AMBIENT_ASTEROID_MAX_X_PERCENT = 100
+export const AMBIENT_ASTEROID_INITIAL_COUNT = 2
 // База и разброс скорости фоновых астероидов.
 export const AMBIENT_ASTEROID_SPEED_BASE_BY_LEVEL = 16
 export const AMBIENT_ASTEROID_SPEED_LEVEL_MULTIPLIER = 3
 export const AMBIENT_ASTEROID_SPEED_RANDOM_RANGE = 18
 // Вертикальный спавн фоновых астероидов.
-export const AMBIENT_ASTEROID_SPAWN_Y_BASE_PERCENT = -12
-export const AMBIENT_ASTEROID_SPAWN_Y_RANDOM_RANGE = 18
+export const AMBIENT_ASTEROID_SPAWN_Y_BASE_PERCENT = -5
+export const AMBIENT_ASTEROID_SPAWN_Y_RANDOM_RANGE = 15
 // Горизонтальный дрифт фоновых астероидов.
 export const AMBIENT_ASTEROID_DRIFT_MIN_PERCENT_PER_SECOND = -5
 export const AMBIENT_ASTEROID_DRIFT_MAX_PERCENT_PER_SECOND = 5

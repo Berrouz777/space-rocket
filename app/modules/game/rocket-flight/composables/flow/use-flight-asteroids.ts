@@ -1,4 +1,4 @@
-import { NEAR_MISS_ASTEROID_MAX_ACTIVE, NEAR_MISS_ASTEROID_SPAWN_CHANCE } from '../../constants'
+import { AMBIENT_ASTEROID_INITIAL_COUNT, NEAR_MISS_ASTEROID_MAX_ACTIVE, NEAR_MISS_ASTEROID_SPAWN_CHANCE } from '../../constants'
 import type { FlightAsteroid, FlightAsteroidsFlowParams } from '../../types'
 import { createAmbientAsteroid, createDeadlyAsteroid, createNearMissAsteroid } from './asteroids/asteroids-factories'
 import { advanceAsteroids, resolveCrashCollision } from './asteroids/asteroids-update'
@@ -100,8 +100,7 @@ export const useFlightAsteroids = (params: UseFlightAsteroidsParams) => {
         // Если игра только началась и астероидов ещё нет,
         // сразу создаём несколько, чтобы не было «пустого» старта.
         if (params.asteroids.value.length === 0) {
-            const initialCount = 3
-            for (let i = 0; i < initialCount; i++) {
+            for (let i = 0; i < AMBIENT_ASTEROID_INITIAL_COUNT; i++) {
                 spawnAmbientAsteroid()
             }
         }
