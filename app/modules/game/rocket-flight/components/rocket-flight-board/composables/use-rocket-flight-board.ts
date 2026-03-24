@@ -153,9 +153,7 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
 
     const blurBackgroundStyle = computed<Record<string, string>>(() => ({
         backgroundImage: `url(${backgroundStarsBlurImage})`,
-        // Увеличиваем фон по высоте, чтобы был запас для смещения,
-        // и двигаем только background-position, не сам слой.
-        backgroundSize: 'auto 140%',
+        backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: `center ${100 - blurParallaxOffsetPercent.value}%`
     }))
