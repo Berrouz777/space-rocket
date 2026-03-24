@@ -5,9 +5,12 @@ import backgroundStarsBlurImage from '~/assets/background-stars_blur.png'
 import { formatMultiplier } from '../../../composables/use-flight-curve'
 import { clamp, lerp } from '../../../utils/math.utils'
 import {
+    BLUR_PARALLAX_MAX_OFFSET_PERCENT,
     LAUNCH_ANIMATION_MS,
     LONG_FLAME_RAMP,
     LONG_FLAME_START_PROGRESS,
+    MOON_IDLE_OFFSET_PERCENT,
+    ROCKET_IDLE_TOP_PERCENT,
     ROCKET_SCALE_END,
     ROCKET_SCALE_START
 } from '../constants/rocket-flight-board.constants'
@@ -15,8 +18,6 @@ import { ROCKET_DODGE_TILT_MAX_DEG } from '../../../constants'
 
 import type { FlightRoundPhase } from '../../../types/flight.types'
 import type { RocketFlightBoardProps } from '../types/rocket-flight-board.types'
-
-const BLUR_PARALLAX_MAX_OFFSET_PERCENT = 20
 
 export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
     const launchSmoothProgress = ref<number>(0)
@@ -161,7 +162,7 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
     const isBlurBackgroundVisible = computed<boolean>(() => props.phase === 'flying')
 
     const moonStyle = computed<Record<string, string>>(() => ({
-        transform: `translate(-50%, ${lerp(0, 140, launchProgress.value)}%) scale(${lerp(1, 0.46, launchProgress.value)})`
+        transform: `translate(-50%, ${lerp(MOON_IDLE_OFFSET_PERCENT, 140, launchProgress.value)}%) scale(${lerp(1, 0.46, launchProgress.value)})`
     }))
 
     const moonShadowStyle = computed<Record<string, string>>(() => {
@@ -176,7 +177,7 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
 
     const rocketWrapperStyle = computed<Record<string, string>>(() => ({
         left: `${props.rocketXPercent}%`,
-        top: `${lerp(81, 56, launchProgress.value)}%`,
+        top: `${lerp(ROCKET_IDLE_TOP_PERCENT, 56, launchProgress.value)}%`,
         transform:
             props.phase === 'idle' || props.phase === 'countdown' || props.phase === 'launching'
                 ? `translate(-50%, -50%) scale(${lerp(ROCKET_SCALE_START, ROCKET_SCALE_END, launchProgress.value)})`
