@@ -1,4 +1,11 @@
-export type FlightRoundPhase = 'idle' | 'countdown' | 'launching' | 'flying' | 'crashed' | 'cashed_out'
+export type FlightRoundPhase = 'idle' | 'countdown' | 'launching' | 'flying' | 'post_cashed_out' | 'crashed' | 'cashed_out'
+
+export interface FlightPostCashoutSummary {
+    isActive: boolean
+    cashoutMultiplier: number
+    virtualCrashMultiplier: number
+    virtualMaxWin: number
+}
 
 export interface FlightLevelConfig {
     level: 1 | 2 | 3

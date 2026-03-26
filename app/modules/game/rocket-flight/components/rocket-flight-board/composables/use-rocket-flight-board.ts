@@ -234,8 +234,17 @@ export const useRocketFlightBoard = (props: RocketFlightBoardProps) => {
 
     const isIdleFloatActive = computed<boolean>(() => props.phase === 'idle' || props.phase === 'countdown')
 
-    const multiplierText = computed<string>(() => formatMultiplier(props.multiplier))
-    const isMultiplierVisible = computed<boolean>(() => props.phase === 'flying' || props.phase === 'crashed' || props.phase === 'cashed_out')
+    const centerMultiplierValue = computed<number>(() => {
+        if (props.phase === 'post_cashed_out' && props.postCashoutSummary.isActive) {
+            return props.postCashoutSummary.cashoutMultiplier
+        }
+
+        return props.multiplier
+    })
+    const multiplierText = computed<string>(() => formatMultiplier(centerMultiplierValue.value))
+    const isMultiplierVisible = computed<boolean>(
+        () => props.phase === 'flying' || props.phase === 'post_cashed_out' || props.phase === 'crashed' || props.phase === 'cashed_out'
+    )
 
     return {
         backgroundStyle,

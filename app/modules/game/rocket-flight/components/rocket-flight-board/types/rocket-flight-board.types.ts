@@ -1,4 +1,4 @@
-import type { FlightAsteroid, FlightRoundPhase } from '../../../types/flight.types'
+import type { FlightAsteroid, FlightPostCashoutSummary, FlightRoundPhase } from '../../../types/flight.types'
 
 export interface RocketFlightBoardProps {
     phase: FlightRoundPhase
@@ -10,4 +10,5 @@ export interface RocketFlightBoardProps {
     moonOffsetYPercent: number
     asteroids: FlightAsteroid[]
     isExplosionVisible: boolean
+    postCashoutSummary: FlightPostCashoutSummary
 }
