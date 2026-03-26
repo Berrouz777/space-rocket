@@ -15,6 +15,7 @@
                         :moon-offset-y-percent="moonOffsetYPercent"
                         :asteroids="asteroids"
                         :is-explosion-visible="isExplosionVisible"
+                        :post-cashout-summary="postCashoutSummary"
                     />
                 </div>
 
@@ -38,8 +39,18 @@
 
     // Bindings
     const rocketFlightStore = useRocketFlightStore()
-    const { phase, countdownValue, multiplier, rocketXPercent, rocketDodgeNormalized, rocketScale, moonOffsetYPercent, asteroids, isExplosionVisible } =
-        storeToRefs(rocketFlightStore)
+    const {
+        phase,
+        countdownValue,
+        multiplier,
+        rocketXPercent,
+        rocketDodgeNormalized,
+        rocketScale,
+        moonOffsetYPercent,
+        asteroids,
+        isExplosionVisible,
+        postCashoutSummary
+    } = storeToRefs(rocketFlightStore)
     const { startRound, cashOut } = useRocketFlightFlow()
 </script>
 

@@ -2,6 +2,9 @@ import { storeToRefs } from 'pinia'
 import {
     FLIGHT_CASHOUT_TO_IDLE_DELAY_MS,
     FLIGHT_CRASH_TO_IDLE_DELAY_MS,
+    FLIGHT_LAUNCH_ANIMATION_MS,
+    FLIGHT_POST_CASHOUT_HOLD_DURATION_MS,
+    FLIGHT_POST_CASHOUT_REVEAL_DURATION_MS,
     FLIGHT_ROCKET_EXPLOSION_DURATION_MS,
     NEAR_MISS_DODGE_OFFSET_MAX_PERCENT,
     ROCKET_DODGE_BASE_LOCK_BLEND_PER_SECOND,
@@ -16,15 +19,15 @@ import { computed } from 'vue'
 import { useFlowRuntime } from './flow/use-flow-runtime'
 import { useFlightAsteroids } from './flow/use-flight-asteroids'
 import { useFlightMultiplier } from './flow/use-flight-multiplier'
+import { resolvePostCashoutScenario } from './flow/use-post-cashout-scenario'
 
 export const useRocketFlightFlow = () => {
     // Bindings
     const rocketFlightStore = useRocketFlightStore()
-    const { phase, level, potentialWin, asteroids, roundSeed, rocketXPercent, rocketScale } = storeToRefs(rocketFlightStore)
+    const { phase, level, potentialWin, asteroids, roundSeed, rocketXPercent, rocketScale, multiplier, betAmount } = storeToRefs(rocketFlightStore)
 
     // State
     const elapsedFlightSeconds = ref<number>(0)
-    const LAUNCH_ANIMATION_MS = 500
     const rocketDodgeOffsetPercent = ref<number>(0)
     const rocketDodgeTargetOffsetPercent = ref<number>(0)
     const rocketDodgeTiltNormalized = ref<number>(0)
@@ -207,7 +210,7 @@ export const useRocketFlightFlow = () => {
         }
 
         rocketFlightStore.setPhase('launching')
-        await pushTimeout(() => undefined, LAUNCH_ANIMATION_MS)
+        await pushTimeout(() => undefined, FLIGHT_LAUNCH_ANIMATION_MS)
         startFlying()
     }
 
@@ -218,13 +221,35 @@ export const useRocketFlightFlow = () => {
 
         flightAsteroids.reset()
         resetRocketDodge()
+        const cashoutMultiplier = multiplier.value
         const winAmount = potentialWin.value
+        const postCashoutScenario = resolvePostCashoutScenario({
+            cashoutMultiplier,
+            betAmount: betAmount.value
+        })
+
+        rocketFlightStore.setPostCashoutSummary({
+            isActive: true,
+            cashoutMultiplier,
+            virtualCrashMultiplier: postCashoutScenario.virtualCrashMultiplier,
+            virtualMaxWin: postCashoutScenario.virtualMaxWin
+        })
         rocketFlightStore.applyWinToBalance(winAmount)
-        rocketFlightStore.setPhase('cashed_out')
+        rocketFlightStore.setPhase('post_cashed_out')
 
         void pushTimeout(() => {
-            resetToIdle()
-        }, FLIGHT_CASHOUT_TO_IDLE_DELAY_MS)
+            rocketFlightStore.setPostCashoutSummary({
+                isActive: false,
+                cashoutMultiplier,
+                virtualCrashMultiplier: postCashoutScenario.virtualCrashMultiplier,
+                virtualMaxWin: postCashoutScenario.virtualMaxWin
+            })
+            rocketFlightStore.setPhase('cashed_out')
+
+            void pushTimeout(() => {
+                resetToIdle()
+            }, FLIGHT_CASHOUT_TO_IDLE_DELAY_MS)
+        }, FLIGHT_POST_CASHOUT_REVEAL_DURATION_MS + FLIGHT_POST_CASHOUT_HOLD_DURATION_MS)
     }
 
     onUnmounted(() => {

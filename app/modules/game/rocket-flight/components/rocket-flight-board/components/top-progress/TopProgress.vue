@@ -7,20 +7,33 @@
                 <div
                     v-for="tick in ticks"
                     :key="tick.value"
-                    class="absolute top-1/2 h-[400%] w-[1%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[linear-gradient(-180deg,_#FFFF29_0%,_#FF8142_100%)]"
+                    class="absolute top-1/2 h-[400%] w-[1%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[linear-gradient(-180deg,_#FFFF29_0%,_#FF8142_100%)] transition-opacity duration-500"
+                    :class="isTicksVisible ? 'opacity-100' : 'opacity-0'"
                     :style="{ left: `${tick.percent}%` }"
                 />
 
-                <img
-                    class="absolute top-1/2 z-10 w-[5%] -translate-x-1/2 -translate-y-1/2 rotate-90"
-                    :style="{ left: `${rocketLeftPercent}%` }"
-                    :src="rocketImage"
-                    alt=""
-                />
+                <div
+                    class="absolute top-1/2 z-10"
+                    :style="{
+                        left: `${rocketLeftPercent}%`,
+                        transform: `translate(-50%, -50%) scale(${rocketRevealScale})`
+                    }"
+                >
+                    <img class="w-[5cqw] rotate-90" :src="rocketImage" alt="" />
+                    <p
+                        v-if="isPostCashoutRevealActive"
+                        class="pointer-events-none absolute left-1/2 top-[110%] -translate-x-1/2 whitespace-nowrap text-game-base font-black text-white drop-shadow-[0_0.4cqw_0.8cqw_rgba(0,0,0,0.9)]"
+                    >
+                        {{ revealMultiplierText }}
+                    </p>
+                </div>
             </div>
         </div>
 
-        <div class="relative mt-[3%] h-[2.2%] text-game-base font-black text-white">
+        <div
+            class="relative mt-[3%] h-[2.2%] text-game-base font-black text-white transition-opacity duration-500"
+            :class="isTicksVisible ? 'opacity-100' : 'opacity-0'"
+        >
             <span
                 v-for="tick in ticks"
                 :key="`${tick.value}-label`"
@@ -48,5 +61,9 @@
     const props = defineProps<TopProgressProps>()
 
     // Computed
-    const { rocketLeftPercent, ticks } = useTopProgress(toRef(props, 'multiplier'))
+    const { rocketLeftPercent, ticks, revealMultiplierText, rocketRevealScale, isPostCashoutRevealActive, isTicksVisible } = useTopProgress({
+        multiplier: toRef(props, 'multiplier'),
+        phase: toRef(props, 'phase'),
+        postCashoutSummary: toRef(props, 'postCashoutSummary')
+    })
 </script>

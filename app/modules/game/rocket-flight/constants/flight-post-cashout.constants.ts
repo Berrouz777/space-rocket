@@ -1,0 +1,5 @@
+import { FLIGHT_LEVELS } from './flight.constants'
+
+export const FLIGHT_POST_CASHOUT_MAX_MULTIPLIER = FLIGHT_LEVELS.at(-1)?.kMax ?? 10000
+export const FLIGHT_POST_CASHOUT_VIRTUAL_STEP_SECONDS = 1 / 60
+export const FLIGHT_POST_CASHOUT_VIRTUAL_MAX_STEPS = 12000

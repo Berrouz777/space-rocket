@@ -1,0 +1,11 @@
+export const TOP_PROGRESS_MIN_MULTIPLIER = 1
+export const TOP_PROGRESS_MAX_MULTIPLIER = 10000
+
+export const TOP_PROGRESS_REVEAL_ROCKET_SCALE_FROM = 1
+export const TOP_PROGRESS_REVEAL_ROCKET_SCALE_TO = 1.22
+
+export const TOP_PROGRESS_ROCKET_WIDTH_PERCENT = 7
+
+export const TOP_PROGRESS_MILESTONES = [1, 2, 5, 10000] as const
+export const TOP_PROGRESS_POSITIONS = [0, 100 / 3, (100 / 3) * 2, 100] as const
+export const TOP_PROGRESS_TICK_VALUES = [2, 5, 10000] as const

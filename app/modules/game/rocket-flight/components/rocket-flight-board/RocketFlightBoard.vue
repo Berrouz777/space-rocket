@@ -12,7 +12,7 @@
         />
 
         <div class="board-content-shell absolute inset-y-0 left-1/2 h-full w-full -translate-x-1/2 [container-type:inline-size]">
-            <TopProgress :multiplier="multiplier" />
+            <TopProgress :phase="phase" :multiplier="multiplier" :post-cashout-summary="postCashoutSummary" />
 
             <div class="absolute inset-0" :class="isIdleFloatActive ? 'board-idle-float' : ''">
                 <div class="absolute bottom-0 left-1/2 z-10 w-[90%] -translate-x-1/2 transition-all duration-300" :style="moonStyle">

@@ -1,66 +1,82 @@
 import { computed, type Ref } from 'vue'
+import { FLIGHT_POST_CASHOUT_REVEAL_DURATION_MS } from '../../../../../constants'
+import { formatMultiplier } from '../../../../../composables/use-flight-curve'
 import { clamp, lerp } from '../../../../../utils/math.utils'
+import type { FlightPostCashoutSummary, FlightRoundPhase } from '../../../../../types'
+import {
+    TOP_PROGRESS_REVEAL_ROCKET_SCALE_FROM,
+    TOP_PROGRESS_REVEAL_ROCKET_SCALE_TO,
+    TOP_PROGRESS_ROCKET_WIDTH_PERCENT
+} from '../constants/top-progress.constants'
+import { usePostCashoutReveal } from './use-post-cashout-reveal'
+import { fromTopProgressPercent, getTopProgressTicks, toTopProgressPercent } from './use-top-progress-scale'
 
-export const useTopProgress = (multiplier: Ref<number>) => {
-    const MIN_MULTIPLIER = 1
-    const MAX_MULTIPLIER = 10000
+export const useTopProgress = (params: { multiplier: Ref<number>; phase: Ref<FlightRoundPhase>; postCashoutSummary: Ref<FlightPostCashoutSummary> }) => {
+    const isPostCashoutRevealActive = computed<boolean>(() => params.phase.value === 'post_cashed_out' && params.postCashoutSummary.value.isActive)
+    const isPostCashoutLockedAtMax = computed<boolean>(
+        () => params.phase.value === 'cashed_out' && !params.postCashoutSummary.value.isActive && params.postCashoutSummary.value.virtualCrashMultiplier > 1
+    )
 
-    /**
-     * UI шкала как в макете: отметки x2/x5/x10.000 стоят равномерно.
-     * При этом прогресс внутри каждого сегмента интерполируем в log-пространстве,
-     * чтобы ранние значения не "летали" слишком быстро.
-     */
-    const milestones = [1, 2, 5, 10000] as const
-    const positions = [0, 100 / 3, (100 / 3) * 2, 100] as const
+    const { revealProgress } = usePostCashoutReveal(isPostCashoutRevealActive, FLIGHT_POST_CASHOUT_REVEAL_DURATION_MS)
 
-    const toSegmentPercent = (value: number): number => {
-        const v = clamp(value, MIN_MULTIPLIER, MAX_MULTIPLIER)
-        const idx = v <= milestones[1] ? 0 : v <= milestones[2] ? 1 : 2
+    const revealEasedProgress = computed<number>(() => clamp(revealProgress.value, 0, 1))
 
-        const a = milestones[idx]!
-        const b = milestones[idx + 1]!
-        const pa = positions[idx]!
-        const pb = positions[idx + 1]!
-
-        const la = Math.log10(a)
-        const lb = Math.log10(b)
-        const lv = Math.log10(v)
-        const t = lb === la ? 0 : clamp((lv - la) / (lb - la), 0, 1)
-
-        return lerp(pa, pb, t)
-    }
-
-    const progressPercent = computed<number>(() => {
-        return toSegmentPercent(multiplier.value)
+    const revealProgressPercent = computed<number>(() => {
+        const summary = params.postCashoutSummary.value
+        const startPercent = toTopProgressPercent(summary.cashoutMultiplier)
+        const endPercent = toTopProgressPercent(summary.virtualCrashMultiplier)
+        return lerp(startPercent, endPercent, revealEasedProgress.value)
     })
 
-    // Не даём ракете вылезать за границы трека.
-    // Подогнано под текущую вёрстку: ширина ракеты ~7% от ширины трека.
-    const ROCKET_WIDTH_PERCENT = 7
-    const rocketLeftPercent = computed<number>(() => clamp(progressPercent.value, ROCKET_WIDTH_PERCENT / 2, 100 - ROCKET_WIDTH_PERCENT / 2))
+    const progressPercent = computed<number>(() => {
+        if (isPostCashoutRevealActive.value) {
+            return revealProgressPercent.value
+        }
 
-    const TICK_VALUES = [2, 5, 10000] as const
-    const ticks = computed(() =>
-        TICK_VALUES.map((value: (typeof TICK_VALUES)[number], i: number) => {
-            const percent = positions[i + 1]!
-            const tickWidthPercent = 1
-            const safeLeftPercent = clamp(percent, tickWidthPercent / 2, 100 - tickWidthPercent / 2)
-            const labelWidthPercent = value === 10000 ? 18 : 10
-            const labelOffsetPercent = value === 10000 ? 10 : 0
-            const labelLeftPercent = clamp(percent + labelOffsetPercent, labelWidthPercent / 2, 100 - labelWidthPercent / 2)
+        if (isPostCashoutLockedAtMax.value) {
+            return toTopProgressPercent(params.postCashoutSummary.value.virtualCrashMultiplier)
+        }
 
-            return {
-                value,
-                label: value === 10000 ? 'x10.000' : `x${value}`,
-                percent: safeLeftPercent,
-                labelLeftPercent
+        return toTopProgressPercent(params.multiplier.value)
+    })
+
+    const revealDisplayMultiplier = computed<number>(() => {
+        if (!isPostCashoutRevealActive.value) {
+            if (isPostCashoutLockedAtMax.value) {
+                return params.postCashoutSummary.value.virtualCrashMultiplier
             }
-        })
+            return params.multiplier.value
+        }
+
+        return fromTopProgressPercent(revealProgressPercent.value)
+    })
+
+    const rocketLeftPercent = computed<number>(() =>
+        clamp(progressPercent.value, TOP_PROGRESS_ROCKET_WIDTH_PERCENT / 2, 100 - TOP_PROGRESS_ROCKET_WIDTH_PERCENT / 2)
     )
+    const rocketRevealScale = computed<number>(() => {
+        if (isPostCashoutRevealActive.value) {
+            return lerp(TOP_PROGRESS_REVEAL_ROCKET_SCALE_FROM, TOP_PROGRESS_REVEAL_ROCKET_SCALE_TO, revealEasedProgress.value)
+        }
+
+        if (isPostCashoutLockedAtMax.value) {
+            return TOP_PROGRESS_REVEAL_ROCKET_SCALE_TO
+        }
+
+        return TOP_PROGRESS_REVEAL_ROCKET_SCALE_FROM
+    })
+    const revealMultiplierText = computed<string>(() => formatMultiplier(revealDisplayMultiplier.value))
+    const isTicksVisible = computed<boolean>(() => !isPostCashoutRevealActive.value && !isPostCashoutLockedAtMax.value)
+
+    const ticks = computed(() => getTopProgressTicks())
 
     return {
         progressPercent,
         rocketLeftPercent,
-        ticks
+        ticks,
+        revealMultiplierText,
+        rocketRevealScale,
+        isPostCashoutRevealActive,
+        isTicksVisible
     }
 }

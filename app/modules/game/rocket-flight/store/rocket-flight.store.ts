@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { FLIGHT_BALANCE_DEFAULT, FLIGHT_BET_DEFAULT } from '../constants/flight.constants'
-import type { FlightAsteroid, FlightRoundPhase } from '../types/flight.types'
+import type { FlightAsteroid, FlightPostCashoutSummary, FlightRoundPhase } from '../types/flight.types'
 
 export const useRocketFlightStore = defineStore('rocket-flight', () => {
     // State
@@ -19,6 +19,12 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
     const isExplosionVisible = ref<boolean>(false)
     const roundSeed = ref<number>(0)
     const collisionCumulativePrevious = ref<number>(0)
+    const postCashoutSummary = ref<FlightPostCashoutSummary>({
+        isActive: false,
+        cashoutMultiplier: 1,
+        virtualCrashMultiplier: 1,
+        virtualMaxWin: 0
+    })
 
     // Getters
     const potentialWin = computed<number>(() => betAmount.value * multiplier.value)
@@ -79,6 +85,10 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         lastWinAmount.value = value
     }
 
+    const setPostCashoutSummary = (value: FlightPostCashoutSummary) => {
+        postCashoutSummary.value = value
+    }
+
     const applyWinToBalance = (winAmount: number) => {
         balance.value += winAmount
         lastWinAmount.value = winAmount
@@ -95,6 +105,12 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         asteroids.value = []
         isExplosionVisible.value = false
         collisionCumulativePrevious.value = 0
+        postCashoutSummary.value = {
+            isActive: false,
+            cashoutMultiplier: 1,
+            virtualCrashMultiplier: 1,
+            virtualMaxWin: 0
+        }
     }
 
     return {
@@ -113,6 +129,7 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         isExplosionVisible,
         roundSeed,
         collisionCumulativePrevious,
+        postCashoutSummary,
         potentialWin,
         isFlying,
         isCountdown,
@@ -130,6 +147,7 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         setRoundSeed,
         setCollisionCumulativePrevious,
         setLastWinAmount,
+        setPostCashoutSummary,
         applyWinToBalance,
         resetRoundView
     }
