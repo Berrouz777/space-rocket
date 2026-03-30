@@ -14,7 +14,8 @@ export default <Partial<Config>>{
                 // scrollbar: { track: '#585858', thumb: '#BBC8B5' }
             },
             fontFamily: {
-                sans: ['Apex Mk3', 'system-ui', 'ui-sans-serif', 'sans-serif']
+                sans: ['Apex Mk3', 'system-ui', 'ui-sans-serif', 'sans-serif'],
+                abeezee: ['ABeeZee', 'system-ui', 'ui-sans-serif', 'sans-serif']
             },
             fontSize: {
                 'game-2xs': ['clamp(4px, 2cqw, 16px)', { lineHeight: '1' }],
