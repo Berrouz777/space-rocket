@@ -1,5 +1,5 @@
 import type { FlightRoundPhase } from '~/modules/game/rocket-flight'
 
-export interface FooterBlockProps {
+export type FooterPanelProps = {
     phase: FlightRoundPhase
 }

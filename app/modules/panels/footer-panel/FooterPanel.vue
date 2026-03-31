@@ -8,7 +8,7 @@
                     <div class="flex w-full gap-[3px]">
                         <div class="min-h-[100px] flex-1 rounded-[3px] bg-[#111737] p-[4px]">
                             <div class="grid h-full w-full grid-rows-[1fr_1fr_1fr] gap-[2px]">
-                                <BetControlPanel :value="betValue" @decrease="onBetDecrease" @increase="onBetIncrease" />
+                                <BetControlPanel :value="betAmount" @decrease="onBetDecrease" @increase="onBetIncrease" />
 
                                 <div class="flex h-full w-full gap-[2px]">
                                     <ActionButton
@@ -52,27 +52,24 @@
                 </div>
             </div>
         </div>
-
-        <div class="menu-shell relative w-full">
-            <img class="relative z-10 w-full select-none object-contain" :src="menuImage" alt="" />
-        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import menuImage from '~/assets/menu.png'
     import { FLIGHT_BET_DEFAULT } from '~/modules/game/rocket-flight/constants'
+    import { storeToRefs } from 'pinia'
+    import { useRocketFlightStore } from '~/modules/game/rocket-flight'
     import ActionButton from './components/buttons/components/action-button/ActionButton.vue'
     import BetControlPanel from './components/bet-control-panel/BetControlPanel.vue'
     import { BET_STEP_VALUES, CONTROL_ACTION_BUTTONS } from './components/buttons/components/action-button/constants/action-button.constants'
     import ContentWrapper from './components/content-wrapper/ContentWrapper.vue'
 
     // Types
-    import type { FooterBlockProps } from './types/footer-block.types'
+    import type { FooterPanelProps } from './types/footer-panel.types'
     import type { ActionButtonPayload } from './components/buttons/components/action-button/type/action-button.types'
 
     // Props
-    const props = defineProps<FooterBlockProps>()
+    const props = defineProps<FooterPanelProps>()
 
     // Emits
     const emit = defineEmits<{
@@ -83,7 +80,8 @@
     // Computed
     const isFlying = computed<boolean>(() => props.phase === 'flying')
     const actionLabel = computed<string>(() => (isFlying.value ? 'STOP' : 'GO'))
-    const betValue = ref<number>(FLIGHT_BET_DEFAULT)
+    const rocketFlightStore = useRocketFlightStore()
+    const { betAmount } = storeToRefs(rocketFlightStore)
 
     // Methods
     const onActionClick = () => {
@@ -97,22 +95,22 @@
 
     const onFooterAction = (payload: ActionButtonPayload) => {
         if (payload.action === 'bet-step' && payload.value) {
-            betValue.value += payload.value
+            rocketFlightStore.setBetAmount(betAmount.value + payload.value)
             return
         }
 
         if (payload.action === 'clear') {
-            betValue.value = FLIGHT_BET_DEFAULT
+            rocketFlightStore.setBetAmount(FLIGHT_BET_DEFAULT)
             return
         }
     }
 
     const onBetDecrease = () => {
-        betValue.value = Math.max(0, betValue.value - 1)
+        rocketFlightStore.setBetAmount(betAmount.value - 1)
     }
 
     const onBetIncrease = () => {
-        betValue.value += 1
+        rocketFlightStore.setBetAmount(betAmount.value + 1)
     }
 </script>
 
@@ -121,12 +119,7 @@
         --footer-bg: linear-gradient(180deg, #ad83be 0%, #251c31 100%);
     }
 
-    .menu-shell {
-        --footer-bg: linear-gradient(180deg, #151618 0%, #2a1228 23%, #5b2a65 100%);
-    }
-
-    .panel-shell::before,
-    .menu-shell::before {
+    .panel-shell::before {
         content: '';
         position: absolute;
         inset-block: 0;

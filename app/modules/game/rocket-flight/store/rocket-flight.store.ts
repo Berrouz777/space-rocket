@@ -94,6 +94,23 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         lastWinAmount.value = winAmount
     }
 
+    const setBetAmount = (value: number) => {
+        betAmount.value = Math.max(0, value)
+    }
+
+    const trySpendBetFromBalance = (): boolean => {
+        if (betAmount.value <= 0) {
+            return true
+        }
+
+        if (balance.value < betAmount.value) {
+            return false
+        }
+
+        balance.value -= betAmount.value
+        return true
+    }
+
     const resetRoundView = () => {
         countdownValue.value = 3
         multiplier.value = 1
@@ -149,6 +166,8 @@ export const useRocketFlightStore = defineStore('rocket-flight', () => {
         setLastWinAmount,
         setPostCashoutSummary,
         applyWinToBalance,
+        setBetAmount,
+        trySpendBetFromBalance,
         resetRoundView
     }
 })

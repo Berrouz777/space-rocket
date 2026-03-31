@@ -20,7 +20,8 @@
                 </div>
 
                 <div class="footer-content-shell">
-                    <FooterBlock :phase="phase" @go="startRound" @stop="cashOut" />
+                    <FooterPanel :phase="phase" @go="startRound" @stop="cashOut" />
+                    <AdminPanel />
                 </div>
             </div>
         </div>
@@ -32,7 +33,7 @@
 <script setup lang="ts">
     // Modules
     import { RocketFlightBoard, useRocketFlightFlow, useRocketFlightStore } from '~/modules/game/rocket-flight'
-    import { FooterBlock } from '~/modules/footer-panel'
+    import { AdminPanel, FooterPanel } from '~/modules/panels'
 
     // Shared
     import OrientationOverlay from '~/shared/ui/orientation/OrientationOverlay.vue'
