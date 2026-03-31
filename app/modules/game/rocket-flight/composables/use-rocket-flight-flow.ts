@@ -200,6 +200,9 @@ export const useRocketFlightFlow = () => {
 
         clearRuntime()
         rocketFlightStore.resetRoundView()
+        if (!rocketFlightStore.trySpendBetFromBalance()) {
+            return
+        }
         rocketFlightStore.setRoundSeed(Date.now())
         rocketFlightStore.setLastWinAmount(0)
         rocketFlightStore.setPhase('countdown')
