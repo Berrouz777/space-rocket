@@ -23,7 +23,17 @@
     const rocketFlightStore = useRocketFlightStore()
     const { balance } = storeToRefs(rocketFlightStore)
 
-    const balanceLabel = computed(() => `${balance.value}$`)
+    const balanceFormatter = new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+        useGrouping: false
+    })
+
+    const balanceLabel = computed(() => {
+        const value = typeof balance.value === 'number' ? balance.value : Number.parseFloat(String(balance.value))
+        const safeValue = Number.isFinite(value) ? value : 0
+        return `${balanceFormatter.format(safeValue)}$`
+    })
 </script>
 
 <style scoped>
